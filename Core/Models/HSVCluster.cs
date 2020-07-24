@@ -35,9 +35,7 @@ namespace Core.Models
 
         public override bool Equals([AllowNull] Cluster Obj)
         {
-            var hsvO = Obj as HSVCluster;
-
-            return hsvO == null ? false : Equals(hsvO);
+            return Obj is HSVCluster hsvO && Equals(hsvO);
         }
 
         public override int GetHashCode()

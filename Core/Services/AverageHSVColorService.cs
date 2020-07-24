@@ -1,21 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
+﻿using Core.Expansions;
 using Core.Models;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Imaging;
+using System.Text;
 
-namespace Core.Expansions
+namespace Core.Services
 {
-    public static class BmpExpansions
+    public class AverageHSVColorService : BaseClusterService
     {
-        public unsafe static HSVCluster CreateCluster(this Bitmap Bmp, int N) 
+        public readonly int N;
+
+        public AverageHSVColorService(int N) 
         {
             if (N < 1)
                 throw new Exception("N < 1");
 
-            var cols = new ColorHSV[N];
-            int width = Bmp.Width, height = Bmp.Height;
+            this.N = N;
+        }
+
+        public override Cluster CreateCluster(Bitmap Bmp)
+        {
+            return CreateCluster(Bmp, 0, 0, Bmp.Width, Bmp.Height);
+        }
+
+        public unsafe override Cluster CreateCluster(Bitmap Bmp, int OffSetX, int OffSetY, int W, int H)
+        {
+            var cols = new ColorHSV[N * N];
+            int width = W, height = H;
             int w = width / N, h = height / N;
             var pxCount = w * h;
             BitmapData bd = Bmp.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
@@ -32,7 +45,7 @@ namespace Core.Expansions
                         var maxY = (yn + 1) * h;
                         for (var y = yn * h; y < maxY; ++y)
                         {
-                            curpos = ((byte*)bd.Scan0) + y * bd.Stride + xn * w;
+                            curpos = ((byte*)bd.Scan0) + y * bd.Stride + xn * w * 3 + OffSetY * bd.Stride + OffSetX * 3;
 
                             var maxX = (xn + 1) * w;
                             for (var x = xn * w; x < maxX; ++x)
@@ -48,7 +61,7 @@ namespace Core.Expansions
                     }
                 }
             }
-            finally 
+            finally
             {
                 Bmp.UnlockBits(bd);
             }

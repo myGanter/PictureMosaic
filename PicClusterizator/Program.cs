@@ -12,24 +12,9 @@ namespace PicClusterizator
     {
         static void Main(string[] args)
         {
-            //var h = new List<ColorHSV>() { new ColorHSV(1, 2, 3), new ColorHSV(4, 5, 6) };
-            //var str = JsonConvert.SerializeObject(h);
-
-            //Console.WriteLine(str);
-
-            //var hh = JsonConvert.DeserializeObject<List<ColorHSV>>(str, new JsonHSVConverter());
-
-
-            var h = new HSVCluster(new ColorHSV[2] { new ColorHSV(1, 2, 3), new ColorHSV(4, 5, 6) });
-            var h1 = new HSVCluster(new ColorHSV[2] { new ColorHSV(1, 2, 3), new ColorHSV(4, 5, 6) });
-
-            var c = h.GetHashCode();
-            var c2 = h1.GetHashCode();
-
-            var dic = new Dictionary<HSVCluster, int>();
-            dic.Add(h, 1);
-            dic.Add(h1, 1);
-
+            AppConfigService.InitArgs(args);
+            var conf = AppConfigService.GetConfig<CoreAppConf>();
+            Console.WriteLine(conf.N[1]); Console.WriteLine(conf.Q);
             Console.ReadKey();
         }
     }
