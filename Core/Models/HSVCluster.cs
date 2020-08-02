@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
+using System.Drawing;
+using Core.Expansions;
 
 namespace Core.Models
 {
@@ -16,6 +15,21 @@ namespace Core.Models
                 throw new Exception("Colors empty");
 
             this.Colors = Colors;
+        }
+        public override Color GetAvColor()
+        {
+            int h = 0, s = 0, v = 0;
+
+            for (var i = 0; i < Colors.Length; ++i) 
+            {
+                h += Colors[i].H;
+                s += Colors[i].S;
+                v += Colors[i].V;
+            }
+
+            var resHsv = new ColorHSV((short)(h / Colors.Length), (short)(s / Colors.Length), (short)(v / Colors.Length));
+
+            return resHsv.ToARGBColor();
         }
 
         public bool Equals([AllowNull] HSVCluster Obj)

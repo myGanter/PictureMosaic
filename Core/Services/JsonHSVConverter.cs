@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Core.Services
 {
-    class JsonHSVConverter : JsonConverter<ColorHSV>
+    public class JsonHSVConverter : JsonConverter<ColorHSV>
     {
         public override ColorHSV ReadJson(JsonReader reader, Type objectType, [AllowNull] ColorHSV existingValue, bool hasExistingValue, JsonSerializer serializer)
         {

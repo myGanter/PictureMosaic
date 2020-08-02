@@ -2,11 +2,11 @@
 
 namespace Core.Attributes
 {
-    public class ArgAttribute : Attribute
+    public class NameAttribute : Attribute
     {
         public string Name { get; set; }
 
-        public ArgAttribute(string Name) 
+        public NameAttribute(string Name) 
         {
             this.Name = Name;
         }

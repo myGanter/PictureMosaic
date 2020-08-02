@@ -1,21 +1,175 @@
 ﻿using System;
 using Core.Models;
-using Core.Expansions;
 using System.Collections.Generic;
-using Newtonsoft.Json;
-using Newtonsoft;
 using Core.Services;
+using PicClusterizator.Models;
+using System.IO;
+using Core.Parallel;
+using System.Drawing;
+using System.Threading;
+using System.Linq;
 
 namespace PicClusterizator
 {
     class Program
     {
+        private static BaseClusterService ClusterBuilder { get; set; }
+
+        private static void TaskCreator(Action<string> Adder) 
+        {
+            var conf = AppConfigService.GetConfig<Conf>();
+            var allowedExt = new string[2] { ".jpg", ".png" };
+
+            var stack = new Stack<string>();
+            foreach (var p in conf.Paths)
+                stack.Push(p);
+
+            while (stack.Count > 0)
+            {
+                var dir = stack.Pop();
+
+                var files = Directory
+                    .GetFiles(dir)
+                    .Where(x => allowedExt.Any(y => x.ToLower().EndsWith(y)));
+
+                foreach (var i in files)
+                    Adder(i);
+
+                foreach (var i in Directory.GetDirectories(dir))
+                    stack.Push(i);                
+            }
+
+            Console.WriteLine(new string('_', Console.WindowWidth));
+        }
+
+        private static void Frame(string Value) 
+        {
+            var cache = ThreadingInstanceController<Dictionary<Cluster, List<string>>>.GetInstance();
+
+            if (!File.Exists(Value))
+                return;
+
+            using var bmp = new Bitmap(Value);
+            var cluster = ClusterBuilder.CreateCluster(bmp);
+
+            if (!cache.ContainsKey(cluster))
+                cache.Add(cluster, new List<string>());
+
+            cache[cluster].Add(Value);
+
+            Console.WriteLine($"[{Thread.CurrentThread.ManagedThreadId}] {Value}");
+        }
+
+        private static void DrawAttr(string Attr) 
+        {
+            Console.Write(Attr + (Attr.Length >= 15 ? "" : new string(' ', 15 - Attr.Length)));
+        }
+
+        private static void WriteHelp() 
+        {
+            Console.WriteLine("Создаёт кластеризованный образ .jpg & .png картинок.\n");
+
+            Console.WriteLine("PicClusterizator [-Alg] [-ThCout] [-JP] [-P]");
+            DrawAttr("-Alg");
+            Console.WriteLine("Устанавливает алгоритм кластеризации. В соответствии с алгоритмом, нужно передать дополнительные аргументы.");
+            DrawAttr("-ThCout");
+            Console.WriteLine("Количество потоков для обработки.");
+            DrawAttr("-JP");
+            Console.WriteLine("Выходной файл образа.");
+            DrawAttr("-P:path1[+path2][+path3]");
+            Console.WriteLine("Начальные директории обработки.\n");
+
+            Console.WriteLine("Алгоритмы кластеризации");
+            DrawAttr("AverageHSV");
+            Console.WriteLine("В тупую находит среднее значение цвета.");
+            DrawAttr("\t-ClCout");
+            Console.WriteLine("Количество областей (sqrt n).");
+            DrawAttr("\t-ClLenH");
+            Console.WriteLine("Размер дельты Hue (H).");
+            DrawAttr("\t-ClLenS");
+            Console.WriteLine("Размер дельты Saturation (S).");
+            DrawAttr("\t-ClLenV");
+            Console.WriteLine("Размер дельты Value (V).");
+        }
+
         static void Main(string[] args)
         {
-            AppConfigService.InitArgs(args);
-            var conf = AppConfigService.GetConfig<CoreAppConf>();
-            Console.WriteLine(conf.N[1]); Console.WriteLine(conf.Q);
-            Console.ReadKey();
+            if (args != null && (args.Contains("-H") || args.Contains("-h")))
+            {
+                WriteHelp();
+                return;
+            }
+
+            try
+            {
+                AppConfigService.InitArgs(args);
+
+                var conf = AppConfigService.GetConfig<Conf>();
+                if (conf.Paths == null || conf.Paths.Any(x => !Directory.Exists(x)))
+                {
+                    Console.WriteLine("-P invalid");
+                    return;
+                }
+
+                if (conf.ThreadCount < 1 || conf.ThreadCount > 16)
+                {
+                    Console.WriteLine("-ThCout invalid");
+                    return;
+                }
+
+                if (File.Exists(conf.JsonFileName))
+                {
+                    File.Delete(conf.JsonFileName);
+                }
+                File.Create(conf.JsonFileName).Dispose();
+
+                var coreConf = AppConfigService.GetConfig<CoreAppConf>();
+                if (!ClusterServiceBuilder.GetNames().Contains(coreConf.Clustering)) 
+                {
+                    Console.WriteLine("-Alg invalid");
+                    return;
+                }
+
+                try
+                {
+                    ClusterBuilder = ClusterServiceBuilder.GetBuilder(coreConf.Clustering);
+                }
+                catch (Exception e) 
+                {
+                    Console.WriteLine($"The {coreConf.Clustering} arguments are not valid");
+                    return;
+                }                
+
+                ThreadingInstanceController<Dictionary<Cluster, List<string>>>.SetFactoryMethod(() => new Dictionary<Cluster, List<string>>());
+                var fTC = new FrameTaskController<string>(conf.ThreadCount, TaskCreator, Frame);
+                fTC.Run();
+
+                var caches = ThreadingInstanceController<Dictionary<Cluster, List<string>>>.GetInstances(fTC.GetFrameThreadIds());
+
+                var cache = caches[0];
+                for (var i = 1; i < caches.Count; ++i) 
+                {
+                    var cache2 = caches[i];
+                    foreach (var cl in cache2) 
+                    {
+                        if (cache.ContainsKey(cl.Key))
+                            cache[cl.Key].AddRange(cl.Value);
+                        else
+                            cache.Add(cl.Key, cl.Value);
+                    }
+                }
+
+                var serializer = ClusterServiceBuilder.GetSerializer(coreConf.Clustering);
+
+                var jStr = serializer.Serialize(cache.Select(x => Tuple.Create(x.Key, x.Value)).ToList());
+
+                File.WriteAllText(conf.JsonFileName, jStr);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.ReadKey();
+            }
         }
     }
 }

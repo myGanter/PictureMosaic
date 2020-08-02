@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 using Core.Models;
 
@@ -8,6 +6,18 @@ namespace Core.Expansions
 {
     public static class ColorExpansions
     {
+        public static ColorHSV FindCluster(this ColorHSV Hsv, short H, short S, short V)
+        {
+            if (Hsv.V <= 10)
+                return new ColorHSV(0, 0, 0);
+
+            var h = Hsv.H / H * H;
+            var s = Hsv.S / S * S;
+            var v = Hsv.V / V * V;
+
+            return new ColorHSV((short)h, (short)s, (short)v);
+        }
+
         public static Color ToARGBColor(this ColorHSV Hsv)
         {
             int hi = Convert.ToInt32(Math.Floor(Hsv.H / 60d)) % 6;

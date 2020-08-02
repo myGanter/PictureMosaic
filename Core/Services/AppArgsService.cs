@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 
 namespace Core.Services
 {
-    class AppArgsService
+    public class AppArgsService
     {
         private readonly Dictionary<string, List<string>> Cache;
 
