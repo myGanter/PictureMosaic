@@ -21,11 +21,13 @@ namespace PicFillerCore
 
         private static Dictionary<Cluster, List<string>> Cache { get; set; }
 
+        private static ColorClusterSearcher NearClusterSearcher { get; set; }
+
         private static Bitmap Pic { get; set; }
 
         private static MosaicCollectorService MosaicService { get; set; }
 
-        private static void InitMosaicService() 
+        private static void InitMosaicService()
         {
             var conf = AppConfigService.GetConfig<Conf>();
             int picW = Pic.Width, picH = Pic.Height;
@@ -33,7 +35,7 @@ namespace PicFillerCore
             int clWC = picW / w, clHC = picH / h;
             int rPW = clWC * conf.WR, rPH = clHC * conf.HR;
 
-            if (conf.HR < 1 || conf.WR < 1 || rPW > 22000 || rPH > 22000) 
+            if (conf.HR < 1 || conf.WR < 1 || rPW > 22000 || rPH > 22000)
             {
                 var wr = w * 10;
                 var hr = h * 10;
@@ -41,7 +43,7 @@ namespace PicFillerCore
                 rPW = clWC * wr;
                 rPH = clHC * hr;
 
-                if (rPW > 22000 || rPH > 22000) 
+                if (rPW > 22000 || rPH > 22000)
                 {
                     if (rPW > rPH)
                     {
@@ -49,7 +51,7 @@ namespace PicFillerCore
                         wr = 22000 / clWC;
                         hr = (int)Math.Round(wr * cof);
                     }
-                    else 
+                    else
                     {
                         var cof = (double)rPW / rPH;
                         hr = 22000 / clHC;
@@ -57,13 +59,14 @@ namespace PicFillerCore
                     }
 
                     rPW = clWC * wr;
-                    rPH = clHC * hr;                    
+                    rPH = clHC * hr;
                 }
 
                 conf.WR = wr;
                 conf.HR = hr;
             }
 
+            Console.WriteLine($"Mosaic segment W:{conf.WR} H:{conf.HR}");
             MosaicService = new MosaicCollectorService(rPW, rPH, conf.WR, conf.HR);
         }
 
@@ -71,6 +74,8 @@ namespace PicFillerCore
         {
             var rnd = new Random();
             var conf = AppConfigService.GetConfig<Conf>();
+
+            var useNearCluster = conf.UseNearCluster;
 
             int picW = Pic.Width, picH = Pic.Height;
             int w = conf.W, h = conf.H;
@@ -82,9 +87,9 @@ namespace PicFillerCore
 
             InitMosaicService();
 
-            for (var i = 0; i < clHC; ++i) 
+            for (var i = 0; i < clHC; ++i)
             {
-                for (var j = 0; j < clWC; ++j) 
+                for (var j = 0; j < clWC; ++j)
                 {
                     var cluster = ClusterBuilder.CreateCluster(Pic, j * w, i * h, w, h);
 
@@ -95,7 +100,15 @@ namespace PicFillerCore
                         var rndPic = pics[rnd.Next(pics.Count)];
                         clP = new ClusterPos(rndPic, j, i);
                     }
-                    else 
+                    else if (useNearCluster && Cache.Count > 0)
+                    {                     
+                        var bestCl = NearClusterSearcher.GetNearCluster(cluster);
+
+                        var pics = Cache[bestCl];
+                        var rndPic = pics[rnd.Next(pics.Count)];
+                        clP = new ClusterPos(rndPic, j, i);
+                    }
+                    else
                     {
                         clP = new ClusterPos(null, j, i)
                         {
@@ -107,6 +120,7 @@ namespace PicFillerCore
                 }
             }
 
+            NearClusterSearcher = null;
             Console.WriteLine(new string('_', Console.WindowWidth));
         }
 
@@ -114,11 +128,11 @@ namespace PicFillerCore
         {
             if (Value.Col != null)
             {
-                Console.WriteLine($"[{Thread.CurrentThread.ManagedThreadId}] {Value.Col.Value.ToString()}");
+                Console.WriteLine($"[{Thread.CurrentThread.ManagedThreadId}] {Value.Col.Value}");
 
                 MosaicService.FillRect(Value.Col.Value, Value.OffSetW, Value.OffSetH);
             }
-            else 
+            else
             {
                 Console.WriteLine($"[{Thread.CurrentThread.ManagedThreadId}] {Value.Pic}");
 
@@ -135,25 +149,27 @@ namespace PicFillerCore
             Console.Write(Attr + (Attr.Length >= 15 ? "" : new string(' ', 15 - Attr.Length)));
         }
 
-        private static void WriteHelp() 
+        private static void WriteHelp()
         {
             Console.WriteLine("Преобразовывает изображение в мозаику, состоящую из других изображений.\n");
 
-            Console.WriteLine("PicFillerCore [-Pic] [-ThCout] [-JP] [-ClusterW] [-ClusterH] [-ResW] [-ResH]");
+            Console.WriteLine("PicFillerCore [-Pic] [-ThCout] [-JP] [-ClusterW] [-ClusterH] [-ResW] [-ResH] [-UseNear]");
             DrawAttr("-Pic");
-            Console.WriteLine("Путь до картинки, которую нужно преобразовать.");
+            Console.WriteLine("Путь до картинки, которую нужно преобразовать. (string)");
             DrawAttr("-ThCout");
-            Console.WriteLine("Количество потоков для обработки.");
+            Console.WriteLine("Количество потоков для обработки. (sbyte)");
             DrawAttr("-JP");
-            Console.WriteLine("Путь до файла-образа.");
+            Console.WriteLine("Путь до файла-образа. (string)");
             DrawAttr("-ClusterW");
-            Console.WriteLine("Ширина обрабатываемой области оригинальной картинки.");
+            Console.WriteLine("Ширина обрабатываемой области оригинальной картинки. (int)");
             DrawAttr("-ClusterH");
-            Console.WriteLine("Высота обрабатываемой области оригинальной картинки.");
+            Console.WriteLine("Высота обрабатываемой области оригинальной картинки. (int)");
             DrawAttr("-ResW");
-            Console.WriteLine("Ширина одного элемента мозаики.");
+            Console.WriteLine("Ширина одного элемента мозаики. (int)");
             DrawAttr("-ResH");
-            Console.WriteLine("Высота одного элемента мозаики.");
+            Console.WriteLine("Высота одного элемента мозаики. (int)");
+            DrawAttr("-UseNear");
+            Console.WriteLine("Если True, использовать ближайший кластер, в случае не нахождения точного. (bool)");
         }
 
         static void Main(string[] args)
@@ -164,12 +180,12 @@ namespace PicFillerCore
                 return;
             }
 
-            try 
+            try
             {
                 AppConfigService.InitArgs(args);
 
                 var conf = AppConfigService.GetConfig<Conf>();
-                if (!File.Exists(conf.Pic)) 
+                if (!File.Exists(conf.Pic))
                 {
                     Console.WriteLine("-Pic invalid");
                     return;
@@ -177,7 +193,7 @@ namespace PicFillerCore
 
                 Pic = new Bitmap(conf.Pic);
 
-                if (!File.Exists(conf.JsonPath)) 
+                if (!File.Exists(conf.JsonPath))
                 {
                     Console.WriteLine("-JP invalid");
                     return;
@@ -191,7 +207,7 @@ namespace PicFillerCore
 
                 var clw = conf.W;
                 var clh = conf.H;
-                if (clw < 1 || clh < 1 || clw > Pic.Width || clh > Pic.Height) 
+                if (clw < 1 || clh < 1 || clw > Pic.Width || clh > Pic.Height)
                 {
                     Console.WriteLine("-ClusterW or -ClusterH invalid");
                     return;
@@ -211,6 +227,17 @@ namespace PicFillerCore
                 {
                     Console.WriteLine("Json image invalid");
                     return;
+                }
+
+                if (conf.UseNearCluster)
+                {
+                    NearClusterSearcher = new ColorClusterSearcher
+                    {
+                        OldNewValChecker = (oldV, newV) => Cache[newV].Count > Cache[oldV].Count
+                    };
+
+                    foreach (var cl in Cache)
+                        NearClusterSearcher.AddCluster(cl.Key);
                 }
 
                 var fTC = new FrameTaskController<ClusterPos>(conf.ThreadCount, TaskCreator, Frame);

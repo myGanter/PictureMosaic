@@ -27,5 +27,8 @@ namespace PicFillerCore.Models
 
         [Arg("-ResH")]
         public int HR { get; set; }
+
+        [Arg("-UseNear")]
+        public bool UseNearCluster { get; set; }
     }
 }

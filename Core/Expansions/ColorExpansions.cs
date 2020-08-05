@@ -6,6 +6,14 @@ namespace Core.Expansions
 {
     public static class ColorExpansions
     {
+        public static double CaclDistance(this Cluster Cl1, Cluster Cl) 
+        {
+            var p1 = Cl1.GetAvColor();
+            var p2 = Cl.GetAvColor();
+
+            return Math.Sqrt(Math.Pow(p1.R - p2.R, 2) + Math.Pow(p1.G - p2.G, 2) + Math.Pow(p1.B - p2.B, 2));
+        }
+
         public static ColorHSV FindCluster(this ColorHSV Hsv, short H, short S, short V)
         {
             if (Hsv.V <= 10)

@@ -68,6 +68,9 @@ namespace Core.Parallel
         {
             while (!TaskController.DataAdditionHasEnded || ObjsCount > 0)
             {
+                if (ObjsCount == 0)
+                    Thread.Sleep(1);
+
                 while (ObjsCount > 0)
                 {
                     var obj = DequeueObj();

@@ -71,25 +71,25 @@ namespace PicClusterizator
 
             Console.WriteLine("PicClusterizator [-Alg] [-ThCout] [-JP] [-P]");
             DrawAttr("-Alg");
-            Console.WriteLine("Устанавливает алгоритм кластеризации. В соответствии с алгоритмом, нужно передать дополнительные аргументы.");
+            Console.WriteLine("Устанавливает алгоритм кластеризации. В соответствии с алгоритмом, нужно передать дополнительные аргументы. (string)");
             DrawAttr("-ThCout");
-            Console.WriteLine("Количество потоков для обработки.");
+            Console.WriteLine("Количество потоков для обработки. (sbyte)");
             DrawAttr("-JP");
-            Console.WriteLine("Выходной файл образа.");
+            Console.WriteLine("Выходной файл образа. (string)");
             DrawAttr("-P:path1[+path2][+path3]");
-            Console.WriteLine("Начальные директории обработки.\n");
+            Console.WriteLine("Начальные директории обработки. (string string string ...)\n");
 
             Console.WriteLine("Алгоритмы кластеризации");
             DrawAttr("AverageHSV");
             Console.WriteLine("В тупую находит среднее значение цвета.");
             DrawAttr("\t-ClCout");
-            Console.WriteLine("Количество областей (sqrt n).");
+            Console.WriteLine("Количество областей |sqrt n|. (int)");
             DrawAttr("\t-ClLenH");
-            Console.WriteLine("Размер дельты Hue (H).");
+            Console.WriteLine("Размер дельты Hue |H|. (short)");
             DrawAttr("\t-ClLenS");
-            Console.WriteLine("Размер дельты Saturation (S).");
+            Console.WriteLine("Размер дельты Saturation |S|. (short)");
             DrawAttr("\t-ClLenV");
-            Console.WriteLine("Размер дельты Value (V).");
+            Console.WriteLine("Размер дельты Value |V|. (short)");
         }
 
         static void Main(string[] args)
