@@ -8,6 +8,7 @@ using Core.Parallel;
 using System.Drawing;
 using System.Threading;
 using System.Linq;
+using Core.Expansions;
 
 namespace PicClusterizator
 {
@@ -49,8 +50,17 @@ namespace PicClusterizator
             if (!File.Exists(Value))
                 return;
 
-            using var bmp = new Bitmap(Value);
-            var cluster = ClusterBuilder.CreateCluster(bmp);
+            Cluster cluster;
+            using (var bmp = new Bitmap(Value)) 
+            {
+                if (bmp.PixelFormat != System.Drawing.Imaging.PixelFormat.Format24bppRgb) 
+                {
+                    using var nBmp = bmp.ToFormat24bppRgb();
+                    cluster = ClusterBuilder.CreateCluster(nBmp);
+                }
+                else
+                    cluster = ClusterBuilder.CreateCluster(bmp);
+            }
 
             if (!cache.ContainsKey(cluster))
                 cache.Add(cluster, new List<string>());

@@ -1,7 +1,8 @@
 {
   "profiles": {
     "PicClusterizator": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "sqlDebugging": false
     }
   }
 }

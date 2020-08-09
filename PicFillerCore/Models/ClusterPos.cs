@@ -10,11 +10,13 @@ namespace PicFillerCore.Models
     {
         public string Pic { get; set; }
 
-        public Color? Col { get; set; }
+        public Color Col { get; set; }
 
         public int OffSetW { get; set; }
 
         public int OffSetH { get; set; }
+
+        public Conf Conf { get; set; }
 
         public ClusterPos(string Pic, int OffSetW, int OffSetH) 
         {

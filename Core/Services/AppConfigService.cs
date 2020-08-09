@@ -137,38 +137,64 @@ namespace Core.Services
 
             if (ToT == typeof(char))
                 return Str[0];
+            if (ToT == typeof(char?))
+                return (char?)Str[0];
 
             if (ToT == typeof(bool))
                 return bool.Parse(Str);
+            if (ToT == typeof(bool?))
+                return (bool?)bool.Parse(Str);
 
             if (ToT == typeof(byte))
                 return byte.Parse(Str);
             if (ToT == typeof(sbyte))
                 return sbyte.Parse(Str);
+            if (ToT == typeof(byte?))
+                return (byte?)byte.Parse(Str);
+            if (ToT == typeof(sbyte?))
+                return (sbyte?)sbyte.Parse(Str);
 
             if (ToT == typeof(short))
                 return short.Parse(Str);
             if (ToT == typeof(ushort))
                 return ushort.Parse(Str);
+            if (ToT == typeof(short?))
+                return (short?)short.Parse(Str);
+            if (ToT == typeof(ushort?))
+                return (ushort?)ushort.Parse(Str);
 
             if (ToT == typeof(int))
                 return int.Parse(Str);
             if (ToT == typeof(uint))
                 return uint.Parse(Str);
+            if (ToT == typeof(int?))
+                return (int?)int.Parse(Str);
+            if (ToT == typeof(uint?))
+                return (uint?)uint.Parse(Str);
 
             if (ToT == typeof(long))
                 return long.Parse(Str);
             if (ToT == typeof(ulong))
                 return ulong.Parse(Str);
+            if (ToT == typeof(long?))
+                return (long?)long.Parse(Str);
+            if (ToT == typeof(ulong?))
+                return (ulong?)ulong.Parse(Str);
 
             if (ToT == typeof(float))
                 return float.Parse(Str);
+            if (ToT == typeof(float?))
+                return (float?)float.Parse(Str);
 
             if (ToT == typeof(double))
                 return double.Parse(Str);
+            if (ToT == typeof(double?))
+                return (double?)double.Parse(Str);
 
             if (ToT == typeof(decimal))
                 return decimal.Parse(Str);
+            if (ToT == typeof(decimal?))
+                return (decimal?)decimal.Parse(Str);
 
             throw new Exception("Type not supported");
         }

@@ -45,6 +45,18 @@ namespace PicFillerCore.Services
             return null;
         }
 
+        private int GetNonNullCount() 
+        {
+            var i = 0;
+            for (var r = 0; r < 256; ++r)
+                for (var g = 0; g < 256; ++g)
+                    for (var b = 0; b < 256; ++b)
+                        if (Cache[r, g, b] != null) 
+                            i++;
+
+            return i;
+        }
+
         public Cluster AroundContourPlaneRG(int OffSet, int R, int G, int B, ref bool Key) 
         {
             var b = B - OffSet;

@@ -9,7 +9,6 @@ using System.IO;
 using Core.Models;
 using Core.Expansions;
 using Core.Parallel;
-using PicFillerCore.Expansions;
 using PicFillerCore.Services;
 using System.Threading;
 
@@ -81,9 +80,11 @@ namespace PicFillerCore
             int w = conf.W, h = conf.H;
             int clWC = picW / w, clHC = picH / h;
 
-            var nPic = Pic.CutBmpToCenter(clWC * w, clHC * h);
-            Pic.Dispose();
-            Pic = nPic;
+            using (var nPic = Pic.CutBmpToCenter(clWC * w, clHC * h))
+            {
+                Pic.Dispose();
+                Pic = nPic.ToFormat24bppRgb();
+            }
 
             InitMosaicService();
 
@@ -98,7 +99,11 @@ namespace PicFillerCore
                     {
                         var pics = Cache[cluster];
                         var rndPic = pics[rnd.Next(pics.Count)];
-                        clP = new ClusterPos(rndPic, j, i);
+                        clP = new ClusterPos(rndPic, j, i)
+                        {
+                            Col = cluster.GetAvColor(),
+                            Conf = conf
+                        };
                     }
                     else if (useNearCluster && Cache.Count > 0)
                     {                     
@@ -106,13 +111,18 @@ namespace PicFillerCore
 
                         var pics = Cache[bestCl];
                         var rndPic = pics[rnd.Next(pics.Count)];
-                        clP = new ClusterPos(rndPic, j, i);
+                        clP = new ClusterPos(rndPic, j, i)
+                        {
+                            Col = cluster.GetAvColor(),
+                            Conf = conf
+                        };
                     }
                     else
                     {
                         clP = new ClusterPos(null, j, i)
                         {
-                            Col = cluster.GetAvColor()
+                            Col = cluster.GetAvColor(),
+                            Conf = conf
                         };
                     }
 
@@ -126,21 +136,29 @@ namespace PicFillerCore
 
         private static void Frame(ClusterPos Value)
         {
-            if (Value.Col != null)
-            {
-                Console.WriteLine($"[{Thread.CurrentThread.ManagedThreadId}] {Value.Col.Value}");
+            var conf = Value.Conf;
 
-                MosaicService.FillRect(Value.Col.Value, Value.OffSetW, Value.OffSetH);
+            if (Value.Pic == null || conf.PreDefaultColorRender)
+            {
+                MosaicService.FillRect(Value.Col, Value.OffSetW, Value.OffSetH);
             }
-            else
+
+            if (Value.Pic != null)
             {
                 Console.WriteLine($"[{Thread.CurrentThread.ManagedThreadId}] {Value.Pic}");
-
-                var conf = AppConfigService.GetConfig<Conf>();
+                
                 using var fPic = new Bitmap(Value.Pic);
                 using var sPic = fPic.CutBmpToCenter(fPic.Width / conf.WR * conf.WR, fPic.Height / conf.HR * conf.HR);
                 using var rPic = new Bitmap(sPic, conf.WR, conf.HR);
-                MosaicService.DrawImg(rPic, Value.OffSetW, Value.OffSetH);
+                if (conf.SegmentOpacity == null || conf.SegmentOpacity.Value < 0)
+                {
+                    MosaicService.DrawImg(rPic, Value.OffSetW, Value.OffSetH);
+                }
+                else
+                {
+                    using var roppic = rPic.SetImgOpacity(conf.SegmentOpacity.Value);
+                    MosaicService.DrawImg(roppic, Value.OffSetW, Value.OffSetH);
+                }
             }
         }
 
@@ -170,6 +188,10 @@ namespace PicFillerCore
             Console.WriteLine("Высота одного элемента мозаики. (int)");
             DrawAttr("-UseNear");
             Console.WriteLine("Если True, использовать ближайший кластер, в случае не нахождения точного. (bool)");
+            DrawAttr("-DfltColRndr");
+            Console.WriteLine("Если True, сначала рендерит средний цвет кластера а затем накладывает картинку. (bool)");
+            DrawAttr("-SegmOpac");
+            Console.WriteLine("Устанавливает прозрачность кластера |от 0 до 1|. (float)");
         }
 
         static void Main(string[] args)

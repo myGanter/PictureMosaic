@@ -1,7 +1,8 @@
 {
   "profiles": {
     "PicFillerCore": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "sqlDebugging": false
     }
   }
 }

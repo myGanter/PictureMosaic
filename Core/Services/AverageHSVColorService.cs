@@ -59,7 +59,7 @@ namespace Core.Services
             var cols = new ColorHSV[N * N];
             int width = W, height = H;
             int w = width / N, h = height / N;
-            var pxCount = w * h;
+            var pxCount = (uint)(w * h);
             BitmapData bd = Bmp.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
             try
@@ -69,7 +69,7 @@ namespace Core.Services
                 {
                     for (var xn = 0; xn < N; ++xn)
                     {
-                        int r = 0, g = 0, b = 0;
+                        ulong r = 0, g = 0, b = 0;
 
                         var maxY = (yn + 1) * h;
                         for (var y = yn * h; y < maxY; ++y)
@@ -85,7 +85,11 @@ namespace Core.Services
                             }
                         }
 
-                        var col = Color.FromArgb(Math.Abs(r / pxCount), Math.Abs(g / pxCount), Math.Abs(b / pxCount))
+                        r /= pxCount;
+                        g /= pxCount;
+                        b /= pxCount;
+
+                        var col = Color.FromArgb((int)r, (int)g, (int)b)
                             .ToHSVColor()
                             .FindCluster(ClusterCountH, ClusterCountS, ClusterCountV);
                         cols[yn * N + xn] = col;
