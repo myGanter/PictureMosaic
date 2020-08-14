@@ -106,7 +106,7 @@ namespace PicFillerCore
                         };
                     }
                     else if (useNearCluster && Cache.Count > 0)
-                    {                     
+                    {
                         var bestCl = NearClusterSearcher.GetNearCluster(cluster);
 
                         var pics = Cache[bestCl];
@@ -264,18 +264,18 @@ namespace PicFillerCore
 
                 var fTC = new FrameTaskController<ClusterPos>(conf.ThreadCount, TaskCreator, Frame);
                 fTC.Run();
-
-                using (MosaicService)
-                {
-                    using var resImg = MosaicService.GetBmp();
-                    resImg.Save("res.bmp");
-                }
-                Pic.Dispose();
+                
+                using var resImg = MosaicService.GetBmp();
+                resImg.Save("res.bmp");                             
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                Console.ReadKey();
+                Console.WriteLine("\n" + e.Message);
+            }
+            finally 
+            {
+                MosaicService.Dispose();
+                Pic.Dispose();
             }
         }
     }

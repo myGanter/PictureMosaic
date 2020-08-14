@@ -21,7 +21,7 @@ namespace Core.Models
 
         public bool Equals(HashingMinifiedCluster Obj)
         {
-            return Obj != null && Obj.Hash == Hash;
+            return Obj != null && Obj.Hash == Hash && Obj.AvColor.Equals(AvColor);
         }
 
         public override bool Equals(Cluster Obj)
@@ -36,7 +36,7 @@ namespace Core.Models
 
         public override int GetHashCode()
         {
-            return Hash.GetHashCode();
+            return HashCode.Combine(Hash.GetHashCode(), AvColor.GetHashCode());
         }
     }
 }

@@ -7,6 +7,12 @@ namespace Core.Expansions
 {
     public static class ColorExpansions
     {
+        public static double CaclDistance(this Cluster Cl1, int R, int G, int B) 
+        {
+            var p1 = Cl1.GetAvColor();
+            return Math.Sqrt(Math.Pow(p1.R - R, 2) + Math.Pow(p1.G - G, 2) + Math.Pow(p1.B - B, 2));
+        }
+
         public static double CaclDistance(this Cluster Cl1, Cluster Cl) 
         {
             var p1 = Cl1.GetAvColor();
@@ -20,9 +26,13 @@ namespace Core.Expansions
             if (Hsv.V <= 10)
                 return new ColorHSV(0, 0, 0);
 
-            var h = Hsv.H / H * H;
-            var s = Hsv.S / S * S;
-            var v = Hsv.V / V * V;
+            var h = Hsv.S < 6 ? 0 : Hsv.H / H * H + H / 2;
+            var s = Hsv.S / S * S + S / 2;
+            var v = Hsv.V / V * V + V / 2;
+
+            h = h > 360 ? 360 : h;
+            s = s > 100 ? 100 : s;
+            v = v > 100 ? 100 : v;
 
             return new ColorHSV((short)h, (short)s, (short)v);
         }

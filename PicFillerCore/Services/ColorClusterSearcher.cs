@@ -1,5 +1,6 @@
 ﻿using Core.Models;
 using System;
+using Core.Expansions;
 using System.Collections.Generic;
 using System.Text;
 
@@ -28,6 +29,11 @@ namespace PicFillerCore.Services
         public Cluster GetNearCluster(Cluster Obj) 
         {
             var col = Obj.GetAvColor();
+
+            var accurateCl = Cache[col.R, col.G, col.B];
+            if (accurateCl != null)
+                return accurateCl;
+
             var offSet = 1;
             var key = true;
 
@@ -45,7 +51,7 @@ namespace PicFillerCore.Services
             return null;
         }
 
-        private int GetNonNullCount() 
+        public int GetNonNullCount() 
         {
             var i = 0;
             for (var r = 0; r < 256; ++r)
@@ -59,10 +65,15 @@ namespace PicFillerCore.Services
 
         public Cluster AroundContourPlaneRG(int OffSet, int R, int G, int B, ref bool Key) 
         {
+            var bestDist = double.MaxValue;
+            Cluster bestCl = null;
+
             var b = B - OffSet;
             if (b > -1)
             {
                 Key = true;
+                double minDist = double.MaxValue;
+                Cluster cl = null;
 
                 for (var rr = R - OffSet; rr <= R + OffSet; ++rr) 
                 {
@@ -72,17 +83,31 @@ namespace PicFillerCore.Services
                         {
                             if (gg > -1 && gg < 256 && Cache[rr, gg, b] != null) 
                             {
-                                return Cache[rr, gg, b];
+                                var ncl = Cache[rr, gg, b];
+                                var nDist = ncl.CaclDistance(R, G, B);
+                                if (nDist < minDist)
+                                {
+                                    cl = ncl;
+                                    minDist = nDist;
+                                }
                             }
                         }
                     }
-                }            
+                }
+
+                if (cl != null && bestDist > minDist) 
+                {
+                    bestDist = minDist;
+                    bestCl = cl;
+                }
             }
 
             b = B + OffSet;
             if (b < 256)
             {
                 Key = true;
+                double minDist = double.MaxValue;
+                Cluster cl = null;
 
                 for (var rr = R - OffSet; rr <= R + OffSet; ++rr)
                 {
@@ -92,10 +117,22 @@ namespace PicFillerCore.Services
                         {
                             if (gg > -1 && gg < 256 && Cache[rr, gg, b] != null)
                             {
-                                return Cache[rr, gg, b];
+                                var ncl = Cache[rr, gg, b];
+                                var nDist = ncl.CaclDistance(R, G, B);
+                                if (nDist < minDist)
+                                {
+                                    cl = ncl;
+                                    minDist = nDist;
+                                }
                             }
                         }
                     }
+                }
+
+                if (cl != null && bestDist > minDist)
+                {
+                    bestDist = minDist;
+                    bestCl = cl;
                 }
             }
 
@@ -103,6 +140,8 @@ namespace PicFillerCore.Services
             if (r > -1) 
             {
                 Key = true;
+                double minDist = double.MaxValue;
+                Cluster cl = null;
 
                 for (var bb = B - OffSet; bb <= B + OffSet; ++bb) 
                 {
@@ -112,10 +151,22 @@ namespace PicFillerCore.Services
                         {
                             if (gg > -1 && gg < 256 && Cache[r, gg, bb] != null)
                             {
-                                return Cache[r, gg, bb];
+                                var ncl = Cache[r, gg, bb];
+                                var nDist = ncl.CaclDistance(R, G, B);
+                                if (nDist < minDist)
+                                {
+                                    cl = ncl;
+                                    minDist = nDist;
+                                }
                             }
                         }
                     }
+                }
+
+                if (cl != null && bestDist > minDist)
+                {
+                    bestDist = minDist;
+                    bestCl = cl;
                 }
             }
 
@@ -123,6 +174,8 @@ namespace PicFillerCore.Services
             if (r < 256) 
             {
                 Key = true;
+                double minDist = double.MaxValue;
+                Cluster cl = null;
 
                 for (var bb = B - OffSet; bb <= B + OffSet; ++bb)
                 {
@@ -132,10 +185,22 @@ namespace PicFillerCore.Services
                         {
                             if (gg > -1 && gg < 256 && Cache[r, gg, bb] != null)
                             {
-                                return Cache[r, gg, bb];
+                                var ncl = Cache[r, gg, bb];
+                                var nDist = ncl.CaclDistance(R, G, B);
+                                if (nDist < minDist)
+                                {
+                                    cl = ncl;
+                                    minDist = nDist;
+                                }
                             }
                         }
                     }
+                }
+
+                if (cl != null && bestDist > minDist)
+                {
+                    bestDist = minDist;
+                    bestCl = cl;
                 }
             }
 
@@ -143,6 +208,8 @@ namespace PicFillerCore.Services
             if (g > -1) 
             {
                 Key = true;
+                double minDist = double.MaxValue;
+                Cluster cl = null;
 
                 for (var rr = R - OffSet; rr <= R + OffSet; ++rr)
                 {
@@ -152,10 +219,22 @@ namespace PicFillerCore.Services
                         {
                             if (bb > -1 && bb < 256 && Cache[rr, g, bb] != null)
                             {
-                                return Cache[rr, g, bb];
+                                var ncl = Cache[rr, g, bb];
+                                var nDist = ncl.CaclDistance(R, G, B);
+                                if (nDist < minDist)
+                                {
+                                    cl = ncl;
+                                    minDist = nDist;
+                                }
                             }
                         }
                     }
+                }
+
+                if (cl != null && bestDist > minDist)
+                {
+                    bestDist = minDist;
+                    bestCl = cl;
                 }
             }
 
@@ -163,6 +242,8 @@ namespace PicFillerCore.Services
             if (g < 256) 
             {
                 Key = true;
+                double minDist = double.MaxValue;
+                Cluster cl = null;
 
                 for (var rr = R - OffSet; rr <= R + OffSet; ++rr)
                 {
@@ -172,14 +253,25 @@ namespace PicFillerCore.Services
                         {
                             if (bb > -1 && bb < 256 && Cache[rr, g, bb] != null)
                             {
-                                return Cache[rr, g, bb];
+                                var ncl = Cache[rr, g, bb];
+                                var nDist = ncl.CaclDistance(R, G, B);
+                                if (nDist < minDist)
+                                {
+                                    cl = ncl;
+                                    minDist = nDist;
+                                }
                             }
                         }
                     }
                 }
+
+                if (cl != null && bestDist > minDist)
+                {   
+                    bestCl = cl;
+                }
             }
 
-            return null;
+            return bestCl;
         }
     }
 }

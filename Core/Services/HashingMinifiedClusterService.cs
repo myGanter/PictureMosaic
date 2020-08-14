@@ -14,9 +14,18 @@ namespace Core.Services
     {
         private readonly int CacheSize;
 
-        public HashingMinifiedClusterService(int CacheSize) 
+        public readonly short ClusterCountH;
+
+        public readonly short ClusterCountS;
+
+        public readonly short ClusterCountV;
+
+        public HashingMinifiedClusterService(int CacheSize, short ClusterCountH, short ClusterCountS, short ClusterCountV) 
         {
             this.CacheSize = CacheSize;
+            this.ClusterCountH = ClusterCountH;
+            this.ClusterCountS = ClusterCountS;
+            this.ClusterCountV = ClusterCountV;
         }
 
         public static BaseClusterService CreateInstance()
@@ -25,7 +34,16 @@ namespace Core.Services
             if (conf.CacheSize < 1)
                 throw new Exception("-CacheSize invalid");
 
-            return new HashingMinifiedClusterService(conf.CacheSize);
+            if (conf.ClusterLenH < 1 || conf.ClusterLenH > 360)
+                throw new Exception("H < 1 or H > 360");
+
+            if (conf.ClusterLenS < 1 || conf.ClusterLenS > 100)
+                throw new Exception("S < 1 or S > 100");
+
+            if (conf.ClusterLenV < 1 || conf.ClusterLenV > 100)
+                throw new Exception("V < 1 or V > 100");
+
+            return new HashingMinifiedClusterService(conf.CacheSize, conf.ClusterLenH, conf.ClusterLenS, conf.ClusterLenV);
         }
 
         public static IClusterSerializer CreateSerializer()
@@ -79,7 +97,7 @@ namespace Core.Services
             var hash = sb.ToString();
             var bmpAvCol = Bmp.GetAverageColor();
 
-            return new HashingMinifiedCluster(hash, bmpAvCol.ToHSVColor());
+            return new HashingMinifiedCluster(hash, bmpAvCol.ToHSVColor().FindCluster(ClusterCountH, ClusterCountS, ClusterCountV));
         }
 
         public override Cluster CreateCluster(Bitmap Bmp, int OffSetX, int OffSetY, int W, int H)

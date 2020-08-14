@@ -8,6 +8,8 @@ namespace Core.Parallel
     {
         public Thread TaskThread { get; }
 
+        public bool ErrorFlag { get; set; }
+
         private readonly Action<T> Frame;
 
         private readonly Queue<T> ObjsQueue;
@@ -66,12 +68,12 @@ namespace Core.Parallel
 
         private void Process()
         {
-            while (!TaskController.DataAdditionHasEnded || ObjsCount > 0)
+            while ((!TaskController.DataAdditionHasEnded || ObjsCount > 0) && !ErrorFlag)
             {
                 if (ObjsCount == 0)
                     Thread.Sleep(1);
 
-                while (ObjsCount > 0)
+                while (ObjsCount > 0 && !ErrorFlag)
                 {
                     var obj = DequeueObj();
 

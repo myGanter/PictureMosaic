@@ -103,7 +103,7 @@ namespace PicClusterizator
         }
 
         static void Main(string[] args)
-        {
+        {           
             if (args != null && (args.Contains("-H") || args.Contains("-h")))
             {
                 WriteHelp();
@@ -177,8 +177,7 @@ namespace PicClusterizator
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                Console.ReadKey();
+                Console.WriteLine("\n" + e.Message);
             }
         }
     }

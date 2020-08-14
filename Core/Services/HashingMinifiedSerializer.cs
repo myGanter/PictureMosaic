@@ -14,8 +14,12 @@ namespace Core.Services
             var obj = JsonConvert.DeserializeObject<HashingMinifiedDeSerializeContainer>(Json, new JsonHSVConverter());
 
             var conf = AppConfigService.GetConfig<HashingMinifiedConf>();
+            var hashMinConf = obj.HashMinConf;
 
-            conf.CacheSize = obj.HashMinConf.CacheSize;
+            conf.CacheSize = hashMinConf.CacheSize;
+            conf.ClusterLenH = hashMinConf.ClusterLenH;
+            conf.ClusterLenS = hashMinConf.ClusterLenS;
+            conf.ClusterLenV = hashMinConf.ClusterLenV;
 
             var clusterBuilder = ClusterServiceBuilder.GetBuilder(obj.CoreConf.Clustering);
             var cache = obj.Data.ToDictionary(v => (Cluster)v.Item1, v => v.Item2);

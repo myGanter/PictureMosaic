@@ -72,11 +72,22 @@ namespace Core.Parallel
 
             FrameTasks.ForEach(x => x.Start());
 
-            TaskCreator(new Action<T>(ObjAdder));
+            try
+            {
+                TaskCreator(new Action<T>(ObjAdder));
 
-            DataAdditionHasEnded = true;
-
-            FrameTasks.ForEach(x => { if (x.TaskThread.IsAlive) x.TaskThread.Join(); });
+                DataAdditionHasEnded = true;
+            
+                FrameTasks.ForEach(x => { if (x.TaskThread.IsAlive) x.TaskThread.Join(); });
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally 
+            {
+                FrameTasks.ForEach(x =>  x.ErrorFlag = true);
+            }
         }
 
         public async Task RunAsync() 
