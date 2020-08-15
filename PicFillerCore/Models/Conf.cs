@@ -11,7 +11,7 @@ namespace PicFillerCore.Models
         public string Pic { get; set; }
 
         [Arg("-JP")]
-        public string JsonPath { get; set; }
+        public List<string> JsonPath { get; set; }
 
         [Arg("-ThCout")]
         public sbyte ThreadCount { get; set; }

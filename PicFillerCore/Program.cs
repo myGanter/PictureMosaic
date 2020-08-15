@@ -16,9 +16,9 @@ namespace PicFillerCore
 {
     class Program
     {
-        private static BaseClusterService ClusterBuilder { get; set; }
+        private static List<BaseClusterService> ClusterBuilders { get; set; }
 
-        private static Dictionary<Cluster, List<string>> Cache { get; set; }
+        private static List<Dictionary<Cluster, List<string>>> Caches { get; set; }
 
         private static ColorClusterSearcher NearClusterSearcher { get; set; }
 
@@ -88,42 +88,63 @@ namespace PicFillerCore
 
             InitMosaicService();
 
+            var maxCount = Caches.Max(x => x.Count);
+            var maxCountCache = Caches.First(x => x.Count == maxCount);
+            var maxCacheIndex = Caches.IndexOf(maxCountCache);
+
             for (var i = 0; i < clHC; ++i)
             {
                 for (var j = 0; j < clWC; ++j)
                 {
-                    var cluster = ClusterBuilder.CreateCluster(Pic, j * w, i * h, w, h);
+                    ClusterPos clP = null;
+                    Cluster firstCluster = null;
 
-                    ClusterPos clP;
-                    if (Cache.ContainsKey(cluster))
+                    for (var bi = 0; bi < ClusterBuilders.Count; ++bi) 
                     {
-                        var pics = Cache[cluster];
-                        var rndPic = pics[rnd.Next(pics.Count)];
-                        clP = new ClusterPos(rndPic, j, i)
-                        {
-                            Col = cluster.GetAvColor(),
-                            Conf = conf
-                        };
-                    }
-                    else if (useNearCluster && Cache.Count > 0)
-                    {
-                        var bestCl = NearClusterSearcher.GetNearCluster(cluster);
+                        var clB = ClusterBuilders[bi];
+                        var cluster = clB.CreateCluster(Pic, j * w, i * h, w, h);
 
-                        var pics = Cache[bestCl];
-                        var rndPic = pics[rnd.Next(pics.Count)];
-                        clP = new ClusterPos(rndPic, j, i)
+                        if (bi == maxCacheIndex)
+                            firstCluster = cluster;
+
+                        var cache = Caches[bi];
+
+                        if (cache.ContainsKey(cluster)) 
                         {
-                            Col = cluster.GetAvColor(),
-                            Conf = conf
-                        };
+                            var pics = cache[cluster];
+                            var rndPic = pics[rnd.Next(pics.Count)];
+                            clP = new ClusterPos(rndPic, j, i)
+                            {
+                                Col = cluster.GetAvColor(),
+                                Conf = conf
+                            };
+
+                            break;
+                        }
                     }
-                    else
+
+                    if (clP == null)
                     {
-                        clP = new ClusterPos(null, j, i)
+                        if (useNearCluster && maxCountCache.Count > 0)
                         {
-                            Col = cluster.GetAvColor(),
-                            Conf = conf
-                        };
+                            var bestCl = NearClusterSearcher.GetNearCluster(firstCluster);
+
+                            var pics = maxCountCache[bestCl];
+                            var rndPic = pics[rnd.Next(pics.Count)];
+                            clP = new ClusterPos(rndPic, j, i)
+                            {
+                                Col = firstCluster.GetAvColor(),
+                                Conf = conf
+                            };
+                        }
+                        else
+                        {
+                            clP = new ClusterPos(null, j, i)
+                            {
+                                Col = firstCluster.GetAvColor(),
+                                Conf = conf
+                            };
+                        }
                     }
 
                     Adder(clP);
@@ -215,7 +236,7 @@ namespace PicFillerCore
 
                 Pic = new Bitmap(conf.Pic);
 
-                if (!File.Exists(conf.JsonPath))
+                if (conf.JsonPath.Any(x => !File.Exists(x)))
                 {
                     Console.WriteLine("-JP invalid");
                     return;
@@ -237,13 +258,19 @@ namespace PicFillerCore
 
                 try
                 {
-                    var jStr = File.ReadAllText(conf.JsonPath);
-                    var algName = ClusterServiceBuilder.DetermineAlgName(jStr);
-                    var ser = ClusterServiceBuilder.GetSerializer(algName);
+                    ClusterBuilders = new List<BaseClusterService>();
+                    Caches = new List<Dictionary<Cluster, List<string>>>();
 
-                    var obj = ser.Deserialize(jStr);
-                    ClusterBuilder = obj.Item1;
-                    Cache = obj.Item2;
+                    foreach (var jsonP in conf.JsonPath) 
+                    {
+                        var jStr = File.ReadAllText(jsonP);
+                        var algName = ClusterServiceBuilder.DetermineAlgName(jStr);
+                        var ser = ClusterServiceBuilder.GetSerializer(algName);
+
+                        var obj = ser.Deserialize(jStr);
+                        ClusterBuilders.Add(obj.Item1);
+                        Caches.Add(obj.Item2);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -253,12 +280,15 @@ namespace PicFillerCore
 
                 if (conf.UseNearCluster)
                 {
+                    var maxCount = Caches.Max(x => x.Count);
+                    var cache = Caches.First(x => x.Count == maxCount);
+
                     NearClusterSearcher = new ColorClusterSearcher
                     {
-                        OldNewValChecker = (oldV, newV) => Cache[newV].Count > Cache[oldV].Count
+                        OldNewValChecker = (oldV, newV) => cache[newV].Count > cache[oldV].Count
                     };
 
-                    foreach (var cl in Cache)
+                    foreach (var cl in cache)
                         NearClusterSearcher.AddCluster(cl.Key);
                 }
 
@@ -274,8 +304,10 @@ namespace PicFillerCore
             }
             finally 
             {
-                MosaicService.Dispose();
-                Pic.Dispose();
+                if (MosaicService != null)
+                    MosaicService.Dispose();
+                if (Pic != null)
+                    Pic.Dispose();
             }
         }
     }
