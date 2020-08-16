@@ -36,8 +36,8 @@ namespace PicFillerCore
 
             if (conf.HR < 1 || conf.WR < 1 || rPW > 22000 || rPH > 22000)
             {
-                var wr = w * 10;
-                var hr = h * 10;
+                var wr = w * 15;
+                var hr = h * 15;
 
                 rPW = clWC * wr;
                 rPH = clHC * hr;
@@ -46,13 +46,13 @@ namespace PicFillerCore
                 {
                     if (rPW > rPH)
                     {
-                        var cof = (double)rPH / rPW;
+                        var cof = (double)h / w;
                         wr = 22000 / clWC;
                         hr = (int)Math.Round(wr * cof);
                     }
                     else
                     {
-                        var cof = (double)rPW / rPH;
+                        var cof = (double)w / h;
                         hr = 22000 / clHC;
                         wr = (int)Math.Round(hr * cof);
                     }
