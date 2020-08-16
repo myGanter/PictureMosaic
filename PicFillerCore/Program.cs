@@ -192,13 +192,13 @@ namespace PicFillerCore
         {
             Console.WriteLine("Преобразовывает изображение в мозаику, состоящую из других изображений.\n");
 
-            Console.WriteLine("PicFillerCore [-Pic] [-ThCout] [-JP] [-ClusterW] [-ClusterH] [-ResW] [-ResH] [-UseNear]");
+            Console.WriteLine("PicFillerCore -Pic -ThCout -JP -ClusterW -ClusterH [-ResW] [-ResH] [-UseNear] [-DfltColRndr] [-SegmOpac]");
             DrawAttr("-Pic");
             Console.WriteLine("Путь до картинки, которую нужно преобразовать. (string)");
             DrawAttr("-ThCout");
             Console.WriteLine("Количество потоков для обработки. (sbyte)");
-            DrawAttr("-JP");
-            Console.WriteLine("Путь до файла-образа. (string)");
+            DrawAttr("-JP:path1 [path2] [path3]");
+            Console.WriteLine("\nПуть до файла-образа. (string string string)");
             DrawAttr("-ClusterW");
             Console.WriteLine("Ширина обрабатываемой области оригинальной картинки. (int)");
             DrawAttr("-ClusterH");

@@ -72,28 +72,39 @@ namespace PicClusterizator
 
         private static void DrawAttr(string Attr) 
         {
-            Console.Write(Attr + (Attr.Length >= 15 ? "" : new string(' ', 15 - Attr.Length)));
+            Console.Write(Attr + (Attr.Length >= 19 ? "" : new string(' ', 19 - Attr.Length)));
         }
 
         private static void WriteHelp() 
         {
             Console.WriteLine("Создаёт кластеризованный образ .jpg & .png картинок.\n");
 
-            Console.WriteLine("PicClusterizator [-Alg] [-ThCout] [-JP] [-P]");
+            Console.WriteLine("PicClusterizator -Alg:args -ThCout -JP -P");
             DrawAttr("-Alg");
             Console.WriteLine("Устанавливает алгоритм кластеризации. В соответствии с алгоритмом, нужно передать дополнительные аргументы. (string)");
             DrawAttr("-ThCout");
             Console.WriteLine("Количество потоков для обработки. (sbyte)");
             DrawAttr("-JP");
             Console.WriteLine("Выходной файл образа. (string)");
-            DrawAttr("-P:path1[+path2][+path3]");
-            Console.WriteLine("Начальные директории обработки. (string string string ...)\n");
+            DrawAttr("-P:path1 [+path2] [+path3]");
+            Console.WriteLine("\nНачальные директории обработки. (string string string ...)\n");
 
             Console.WriteLine("Алгоритмы кластеризации");
             DrawAttr("AverageHSV");
             Console.WriteLine("В тупую находит среднее значение цвета.");
             DrawAttr("\t-ClCout");
             Console.WriteLine("Количество областей |sqrt n|. (int)");
+            DrawAttr("\t-ClLenH");
+            Console.WriteLine("Размер дельты Hue |H|. (short)");
+            DrawAttr("\t-ClLenS");
+            Console.WriteLine("Размер дельты Saturation |S|. (short)");
+            DrawAttr("\t-ClLenV");
+            Console.WriteLine("Размер дельты Value |V|. (short)");
+
+            DrawAttr("HashingMinified");
+            Console.WriteLine("Создает комбинированный хеш изображения из его среднего цвета и монохромной версии.");
+            DrawAttr("\t-CacheSize");
+            Console.WriteLine("Размер монохромного изображения для хеша |sqrt n|. (sbyte)");
             DrawAttr("\t-ClLenH");
             Console.WriteLine("Размер дельты Hue |H|. (short)");
             DrawAttr("\t-ClLenS");
