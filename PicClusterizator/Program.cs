@@ -50,16 +50,22 @@ namespace PicClusterizator
             if (!File.Exists(Value))
                 return;
 
-            Cluster cluster;
-            using (var bmp = new Bitmap(Value)) 
+            Cluster cluster = null;
+            try 
             {
-                if (bmp.PixelFormat != System.Drawing.Imaging.PixelFormat.Format24bppRgb) 
+                using var bmp = new Bitmap(Value);
+                if (bmp.PixelFormat != System.Drawing.Imaging.PixelFormat.Format24bppRgb)
                 {
                     using var nBmp = bmp.ToFormat24bppRgb();
                     cluster = ClusterBuilder.CreateCluster(nBmp);
                 }
                 else
                     cluster = ClusterBuilder.CreateCluster(bmp);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Pic: {Value} Exception: {e.Message}");
+                return;
             }
 
             if (!cache.ContainsKey(cluster))
