@@ -44,7 +44,9 @@ namespace Core.Parallel
         {
             for (var i = 0; i < NumberAllocatedThreads; ++i)
             {
-                FrameTasks.Add(new FrameTask<T>(this, Frame));
+                var frame = new FrameTask<T>(this, Frame);
+                frame.OnExcept += SetErrorFlagsInThreads;
+                FrameTasks.Add(frame);
             }
         }
 
@@ -79,6 +81,13 @@ namespace Core.Parallel
                 DataAdditionHasEnded = true;
             
                 FrameTasks.ForEach(x => { if (x.TaskThread.IsAlive) x.TaskThread.Join(); });
+
+                var exc = FrameTasks
+                    .Select(x => x.ThrownException)
+                    .FirstOrDefault(x => x != null);
+
+                if (exc != null)
+                    throw exc;
             }
             catch (Exception e)
             {
@@ -86,13 +95,18 @@ namespace Core.Parallel
             }
             finally 
             {
-                FrameTasks.ForEach(x =>  x.ErrorFlag = true);
+                SetErrorFlagsInThreads();
             }
         }
 
         public async Task RunAsync() 
         {
             await Task.Run(() => Run());
+        }
+
+        private void SetErrorFlagsInThreads()
+        {
+            FrameTasks.ForEach(x => x.ErrorFlag = true);
         }
     }
 }

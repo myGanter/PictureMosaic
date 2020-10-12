@@ -10,11 +10,15 @@ namespace Core.Parallel
 
         public bool ErrorFlag { get; set; }
 
+        public Exception ThrownException { get; private set; }
+
         private readonly Action<T> Frame;
 
         private readonly Queue<T> ObjsQueue;
 
         private readonly FrameTaskController<T> TaskController;
+
+        public event Action OnExcept;
 
         public int ObjsCount
         {
@@ -83,8 +87,8 @@ namespace Core.Parallel
                     }
                     catch (Exception ex)
                     {
-                        //доделать норм логировние
-                        Console.WriteLine("bluat: " + ex.Message);
+                        ThrownException = ex;
+                        OnExcept?.Invoke();
                     }
                 }
             }

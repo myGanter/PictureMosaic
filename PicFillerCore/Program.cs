@@ -169,8 +169,7 @@ namespace PicFillerCore
                 Console.WriteLine($"[{Thread.CurrentThread.ManagedThreadId}] {Value.Pic}");
                 
                 using var fPic = new Bitmap(Value.Pic);
-                using var sPic = fPic.CutBmpToCenter(fPic.Width / conf.WR * conf.WR, fPic.Height / conf.HR * conf.HR);
-                using var rPic = new Bitmap(sPic, conf.WR, conf.HR);
+                using var rPic = fPic.CutBmpToCenter(conf.WR, conf.HR);
                 if (conf.SegmentOpacity == null || conf.SegmentOpacity.Value < 0)
                 {
                     MosaicService.DrawImg(rPic, Value.OffSetW, Value.OffSetH);

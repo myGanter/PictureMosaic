@@ -91,13 +91,51 @@ namespace Core.Expansions
             var w = Bmp.Width;
             var h = Bmp.Height;
 
-            if (NewW > w || NewW < 1 || NewH > h || NewH < 1)
+            if (NewW < 1 || NewH < 1)
                 return (Bitmap)Bmp.Clone();
+
+            //если новая ширина или высота превышает ширину или высоту картинки
+            //тогда скейлим картинку под нужный размер
+            Bitmap resizeBmp = null;
+
+            if (w < NewW || h < NewH)
+            {
+                var picWCoof = Bmp.Width / (double)Bmp.Height;
+                var picHCoof = Bmp.Height / (double)Bmp.Width;
+
+                var newWCoof = NewW / (double)NewH;
+                var newHCoof = NewH / (double)NewW;
+
+                int newPicW = 0;
+                int newPicH = 0;
+
+                if (picWCoof <= newWCoof)
+                {
+                    newPicW = NewW;
+                    newPicH = (int)Math.Round(NewW * picHCoof);
+                }
+                else if (picHCoof < newHCoof)
+                {
+                    newPicW = (int)Math.Round(NewH * picWCoof);
+                    newPicH = NewH;        
+                }
+
+                w = newPicW;
+                h = newPicH;
+
+                resizeBmp = new Bitmap(Bmp, newPicW, newPicH);
+                Bmp = resizeBmp;
+            }
 
             var sW = (w - NewW) / 2;
             var sH = (h - NewH) / 2;
 
-            return Bmp.Clone(new Rectangle(sW, sH, NewW, NewH), Bmp.PixelFormat);
+            var res = Bmp.Clone(new Rectangle(sW, sH, NewW, NewH), Bmp.PixelFormat);
+
+            if (resizeBmp != null)
+                resizeBmp.Dispose();
+
+            return res;
         }
 
         public static Bitmap SetImgOpacity(this Bitmap ImgPic, float ImgOpac)
