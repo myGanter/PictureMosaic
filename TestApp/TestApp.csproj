@@ -14,6 +14,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Emgu.CV" Version="4.4.0.4099" />
+    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.4.0.4099" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Images\def.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

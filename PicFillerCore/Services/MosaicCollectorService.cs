@@ -34,6 +34,12 @@ namespace PicFillerCore.Services
                 G.DrawImage(Bmp, X * ClW, Y * ClH, ClW, ClH);
         }
 
+        public void FillImg(Bitmap Bmp)
+        {
+            lock (Locker)
+                G.DrawImage(Bmp, 0, 0, Pic.Width, Pic.Height);
+        }
+
         public void FillRect(Color Col, int X, int Y) 
         {
             lock (Locker)

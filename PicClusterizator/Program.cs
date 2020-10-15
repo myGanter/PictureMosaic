@@ -121,7 +121,7 @@ namespace PicClusterizator
 
         static void Main(string[] args)
         {           
-            if (args != null && (args.Contains("-H") || args.Contains("-h")))
+            if (args == null || !args.Any() || args.Contains("-H") || args.Contains("-h"))
             {
                 WriteHelp();
                 return;

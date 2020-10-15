@@ -196,6 +196,15 @@ namespace Core.Services
             if (ToT == typeof(decimal?))
                 return (decimal?)decimal.Parse(Str);
 
+            if (ToT.IsEnum)            
+                return Enum.Parse(ToT, Str);
+            var enumType = Nullable.GetUnderlyingType(ToT);
+            if (enumType?.IsEnum == true)
+            {
+                var enumVal = Enum.Parse(enumType, Str);
+                return Activator.CreateInstance(ToT, enumVal);
+            }
+
             throw new Exception("Type not supported");
         }
     }

@@ -88,6 +88,11 @@ namespace PicFillerCore
 
             InitMosaicService();
 
+            if (conf.DefaultRender == DefaultRenderEnum.RenderOriginPicture)
+            {
+                MosaicService.FillImg(Pic);
+            }
+
             var maxCount = Caches.Max(x => x.Count);
             var maxCountCache = Caches.First(x => x.Count == maxCount);
             var maxCacheIndex = Caches.IndexOf(maxCountCache);
@@ -159,7 +164,7 @@ namespace PicFillerCore
         {
             var conf = Value.Conf;
 
-            if (Value.Pic == null || conf.PreDefaultColorRender)
+            if (conf.DefaultRender != DefaultRenderEnum.RenderOriginPicture && (Value.Pic == null || conf.DefaultRender == DefaultRenderEnum.PreDefaultColorRender))
             {
                 MosaicService.FillRect(Value.Col, Value.OffSetW, Value.OffSetH);
             }
@@ -169,7 +174,7 @@ namespace PicFillerCore
                 Console.WriteLine($"[{Thread.CurrentThread.ManagedThreadId}] {Value.Pic}");
                 
                 using var fPic = new Bitmap(Value.Pic);
-                using var rPic = fPic.CutBmpToCenter(conf.WR, conf.HR);
+                using var rPic = conf.UseScaleCut ? fPic.CutBmpToCenter(conf.WR, conf.HR) : new Bitmap(fPic, conf.WR, conf.HR);
                 if (conf.SegmentOpacity == null || conf.SegmentOpacity.Value < 0)
                 {
                     MosaicService.DrawImg(rPic, Value.OffSetW, Value.OffSetH);
@@ -208,15 +213,18 @@ namespace PicFillerCore
             Console.WriteLine("Высота одного элемента мозаики. (int)");
             DrawAttr("-UseNear");
             Console.WriteLine("Если True, использовать ближайший кластер, в случае не нахождения точного. (bool)");
-            DrawAttr("-DfltColRndr");
-            Console.WriteLine("Если True, сначала рендерит средний цвет кластера а затем накладывает картинку. (bool)");
+            DrawAttr("-DefaultRender");
+            Console.WriteLine("\nЕсли 'RenderOriginPicture', рендерит на задний фон оригинальную картинку.");
+            Console.WriteLine("Если 'PreDefaultColorRender', сначала рендерит средний цвет кластера а затем накладывает картинку. (enum)");
             DrawAttr("-SegmOpac");
             Console.WriteLine("Устанавливает прозрачность кластера |от 0 до 1|. (float)");
+            DrawAttr("-UseScaleCut");
+            Console.WriteLine("Если True, масштабировать изображение из дата сета при изменении размера. (bool)");
         }
 
         static void Main(string[] args)
         {
-            if (args != null && (args.Contains("-H") || args.Contains("-h")))
+            if (args == null || !args.Any() || args.Contains("-H") || args.Contains("-h"))
             {
                 WriteHelp();
                 return;

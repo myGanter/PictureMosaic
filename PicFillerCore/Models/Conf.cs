@@ -31,10 +31,13 @@ namespace PicFillerCore.Models
         [Arg("-UseNear")]
         public bool UseNearCluster { get; set; }
 
-        [Arg("-DfltColRndr")]
-        public bool PreDefaultColorRender { get; set; }
-
         [Arg("-SegmOpac")]
         public float? SegmentOpacity { get; set; }
+
+        [Arg("-UseScaleCut")]
+        public bool UseScaleCut { get; set; }
+
+        [Arg("-DefaultRender")]
+        public DefaultRenderEnum? DefaultRender { get; set; }
     }
 }
