@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Linq;
 using Core.Expansions;
 
 namespace Core.Models
@@ -18,18 +19,18 @@ namespace Core.Models
         }
         public override Color GetAvColor()
         {
-            int h = 0, s = 0, v = 0;
+            int r = 0, g = 0, b = 0;
 
-            for (var i = 0; i < Colors.Length; ++i) 
+            foreach (var i in Colors.Select(x => x.ToARGBColor()))
             {
-                h += Colors[i].H;
-                s += Colors[i].S;
-                v += Colors[i].V;
+                r += i.R;
+                g += i.G;
+                b += i.B;
             }
 
-            var resHsv = new ColorHSV((short)(h / Colors.Length), (short)(s / Colors.Length), (short)(v / Colors.Length));
+            var colLen = Colors.Length;
 
-            return resHsv.ToARGBColor();
+            return Color.FromArgb(r / colLen, g / colLen, b / colLen);
         }
 
         public bool Equals([AllowNull] HSVCluster Obj)
