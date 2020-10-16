@@ -86,7 +86,7 @@ namespace Core.Expansions
             return res;
         }
 
-        public static Bitmap CutBmpToCenter(this Bitmap Bmp, int NewW, int NewH)
+        public static Bitmap ScaleCutBmpCenter(this Bitmap Bmp, int NewW, int NewH)
         {
             var w = Bmp.Width;
             var h = Bmp.Height;
@@ -94,46 +94,35 @@ namespace Core.Expansions
             if (NewW < 1 || NewH < 1)
                 return (Bitmap)Bmp.Clone();
 
-            //если новая ширина или высота превышает ширину или высоту картинки
-            //тогда скейлим картинку под нужный размер
-            Bitmap resizeBmp = null;
+            //скейлим картинку под нужный размер
+            var picWCoof = w / (double)h;
+            var picHCoof = h / (double)w;
 
-            if (w < NewW || h < NewH)
+            var newWCoof = NewW / (double)NewH;
+            var newHCoof = NewH / (double)NewW;
+
+            int newPicW = 0;
+            int newPicH = 0;
+
+            if (picWCoof <= newWCoof)
             {
-                var picWCoof = Bmp.Width / (double)Bmp.Height;
-                var picHCoof = Bmp.Height / (double)Bmp.Width;
-
-                var newWCoof = NewW / (double)NewH;
-                var newHCoof = NewH / (double)NewW;
-
-                int newPicW = 0;
-                int newPicH = 0;
-
-                if (picWCoof <= newWCoof)
-                {
-                    newPicW = NewW;
-                    newPicH = (int)Math.Round(NewW * picHCoof);
-                }
-                else if (picHCoof < newHCoof)
-                {
-                    newPicW = (int)Math.Round(NewH * picWCoof);
-                    newPicH = NewH;        
-                }
-
-                w = newPicW;
-                h = newPicH;
-
-                resizeBmp = new Bitmap(Bmp, newPicW, newPicH);
-                Bmp = resizeBmp;
+                newPicW = NewW;
+                newPicH = (int)Math.Round(NewW * picHCoof);
+            }
+            else if (picHCoof < newHCoof)
+            {
+                newPicW = (int)Math.Round(NewH * picWCoof);
+                newPicH = NewH;        
             }
 
+            w = newPicW;
+            h = newPicH;
+
+            using var resizeBmp = new Bitmap(Bmp, newPicW, newPicH);
             var sW = (w - NewW) / 2;
             var sH = (h - NewH) / 2;
 
-            var res = Bmp.Clone(new Rectangle(sW, sH, NewW, NewH), Bmp.PixelFormat);
-
-            if (resizeBmp != null)
-                resizeBmp.Dispose();
+            var res = resizeBmp.Clone(new Rectangle(sW, sH, NewW, NewH), resizeBmp.PixelFormat);
 
             return res;
         }

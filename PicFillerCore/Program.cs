@@ -80,7 +80,7 @@ namespace PicFillerCore
             int w = conf.W, h = conf.H;
             int clWC = picW / w, clHC = picH / h;
 
-            using (var nPic = Pic.CutBmpToCenter(clWC * w, clHC * h))
+            using (var nPic = Pic.ScaleCutBmpCenter(clWC * w, clHC * h))
             {
                 Pic.Dispose();
                 Pic = nPic.ToFormat24bppRgb();
@@ -174,7 +174,7 @@ namespace PicFillerCore
                 Console.WriteLine($"[{Thread.CurrentThread.ManagedThreadId}] {Value.Pic}");
                 
                 using var fPic = new Bitmap(Value.Pic);
-                using var rPic = conf.UseScaleCut ? fPic.CutBmpToCenter(conf.WR, conf.HR) : new Bitmap(fPic, conf.WR, conf.HR);
+                using var rPic = conf.UseScaleCut ? fPic.ScaleCutBmpCenter(conf.WR, conf.HR) : new Bitmap(fPic, conf.WR, conf.HR);
                 if (conf.SegmentOpacity == null || conf.SegmentOpacity.Value < 0)
                 {
                     MosaicService.DrawImg(rPic, Value.OffSetW, Value.OffSetH);

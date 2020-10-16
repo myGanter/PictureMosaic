@@ -15,6 +15,8 @@ namespace TestApp
 
         const string DefClearPic = "Images\\def_clear.png";
 
+        const string CatPic = "Images\\cat.jpg";
+
         static void Main(string[] args)
         {           
             //TestCutBmp();
@@ -60,6 +62,7 @@ namespace TestApp
 
         private static void TestCutBmp() 
         {
+            TestCutBmp(new Bitmap(CatPic), 1000, 100, "Images\\catS1.png");
             TestCutBmp(new Bitmap(DefPic), 300, 600, "Images\\defS.png");
             TestCutBmp(new Bitmap(DefClearPic), 300, 600, "Images\\def_clearS.png");
         }
@@ -68,7 +71,7 @@ namespace TestApp
         {
             using (Bmp)
             {
-                using (var newBmp = Bmp.CutBmpToCenter(NewW, NewH))
+                using (var newBmp = Bmp.ScaleCutBmpCenter(NewW, NewH))
                 {
                     newBmp.Save(SaveFileName);
                 }
