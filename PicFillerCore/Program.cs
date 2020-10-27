@@ -307,7 +307,7 @@ namespace PicFillerCore
             }
             catch (Exception e)
             {
-                Console.WriteLine("\n" + e.Message);
+                Console.WriteLine($"\n{e.Message}" + (e.InnerException != null ? $"\nError: {e.InnerException?.Message}" : string.Empty));
             }
             finally 
             {

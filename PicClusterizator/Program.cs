@@ -24,7 +24,7 @@ namespace PicClusterizator
             var stack = new Stack<string>();
             foreach (var p in conf.Paths)
                 stack.Push(p);
-
+            
             while (stack.Count > 0)
             {
                 var dir = stack.Pop();
@@ -194,7 +194,7 @@ namespace PicClusterizator
             }
             catch (Exception e)
             {
-                Console.WriteLine("\n" + e.Message);
+                Console.WriteLine($"\n{e.Message}" + (e.InnerException != null ? $"\nError: {e.InnerException?.Message}" : string.Empty));
             }
         }
     }

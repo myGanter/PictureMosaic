@@ -87,11 +87,11 @@ namespace Core.Parallel
                     .FirstOrDefault(x => x != null);
 
                 if (exc != null)
-                    throw exc;
+                    throw new Exception("An error occurred in one of the FrameTaskController threads.", exc);
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
             finally 
             {
