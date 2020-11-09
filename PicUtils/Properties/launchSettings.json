@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PicUtils": {
+      "commandName": "Project",
+      "commandLineArgs": "-P \"D:\\Origin data set\" -ResPuth \"D:\\Cut data set\" -ThCout 8 -NW 350 -NH 350 -U ScaleCutDataSet"
+    }
+  }
+}
