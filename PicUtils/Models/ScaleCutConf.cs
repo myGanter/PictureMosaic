@@ -15,5 +15,8 @@ namespace PicUtils.Models
 
         [Arg("-NH")]
         public int Height { get; set; }
+
+        [Arg("-SaveOriginName")]
+        public bool SaveOriginName { get; set; }
     }
 }

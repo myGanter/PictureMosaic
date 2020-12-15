@@ -7,6 +7,12 @@ namespace PicFillerCore.Models
 {
     class Conf
     {
+        [Arg("-Batch")]
+        public bool IsBatchProcessing { get; set; }
+
+        [Arg("-PicsPath")]
+        public string PicsPath { get; set; }
+
         [Arg("-Pic")]
         public string Pic { get; set; }
 

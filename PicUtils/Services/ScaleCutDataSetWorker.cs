@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,7 +61,18 @@ namespace PicUtils.Services
             {
                 using var bmp = new Bitmap(Value);
                 using var newBmp = bmp.ScaleCutBmpCenter(CutConf.Width, CutConf.Height);
-                newBmp.Save($"{CutConf.ResultPuth}\\{Number.Value}.jpg");
+
+                string fname;
+                if (CutConf.SaveOriginName)
+                {
+                    fname = $"{CutConf.ResultPuth}\\{Value.Split('\\').Last()}";
+                }
+                else
+                {
+                    fname = $"{CutConf.ResultPuth}\\{Number.Value}.png";
+                }
+
+                newBmp.Save(fname);
 
                 Console.WriteLine($"[{Thread.CurrentThread.ManagedThreadId}] {Value}");
             }
